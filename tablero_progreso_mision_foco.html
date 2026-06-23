@@ -1,0 +1,410 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--azul:#1F4E79;--azul2:#2E75B6;--verde:#375623;--verde2:#C6EFCE;--amarillo:#FFEB9C;--rojo-s:#FBEDE9;--cian-s:#E6F2F5;--gris-l:var(--color-background-secondary);--bdr:var(--color-border-tertiary)}
+body{font-family:var(--font-sans,Arial),sans-serif;font-size:14px;color:var(--color-text-primary);background:transparent;padding:0 0 2rem}
+#app{max-width:100%;overflow:hidden}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 0 16px;border-bottom:0.5px solid var(--bdr)}
+.toolbar h1{font-size:18px;font-weight:500;flex:1;min-width:200px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-primary);transition:background 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn.primary{background:var(--azul2);color:#fff;border-color:var(--azul2)}
+.btn.primary:hover{background:var(--azul)}
+.btn.danger{color:var(--color-text-danger);border-color:var(--color-border-danger)}
+.btn.danger:hover{background:var(--color-background-danger)}
+
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:14px 0}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;text-align:center}
+.stat-card .label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.stat-card .value{font-size:22px;font-weight:500}
+
+.panel{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.panel-box{background:var(--color-background-primary);border:0.5px solid var(--bdr);border-radius:var(--border-radius-md);padding:10px 14px;flex:1;min-width:240px}
+.panel-box h3{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--color-text-secondary)}
+.input-row{display:flex;gap:6px;align-items:center}
+.input-row input{flex:1;height:32px;padding:0 8px;border:0.5px solid var(--bdr);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px}
+.input-row input:focus{outline:none;box-shadow:0 0 0 2px var(--azul2)40}
+
+.tabla-wrap{overflow-x:auto;border:0.5px solid var(--bdr);border-radius:var(--border-radius-lg)}
+table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:600px}
+th{background:var(--azul);color:#fff;font-weight:500;font-size:12px;padding:8px 6px;text-align:center;position:sticky;top:0;z-index:2}
+th:first-child{text-align:left;padding-left:12px;background:var(--azul)}
+th.nv-col{min-width:90px;cursor:pointer}
+th.nv-col:hover{background:var(--azul2)}
+tr:nth-child(even){background:var(--color-background-secondary)}
+tr:nth-child(odd){background:var(--color-background-primary)}
+tr.tdah-row td:first-child{border-left:3px solid #9C2B0E}
+tr.normal-row td:first-child{border-left:3px solid #00708C}
+td{padding:7px 6px;text-align:center;font-size:13px;border-bottom:0.5px solid var(--bdr)}
+td:first-child{text-align:left;padding-left:10px;font-weight:500;min-width:140px}
+td.obs-cell{text-align:left;font-size:12px;color:var(--color-text-secondary)}
+td.obs-cell input{width:100%;border:none;background:transparent;color:var(--color-text-secondary);font-size:12px;font-family:inherit;outline:none}
+
+.cell-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:6px;border:0.5px solid var(--bdr);cursor:pointer;font-size:15px;background:transparent;transition:all 0.12s;user-select:none}
+.cell-btn:hover{transform:scale(1.1)}
+.cell-btn.done{background:var(--verde2);border-color:#375623;color:#375623}
+.cell-btn.progress{background:var(--amarillo);border-color:#7D6608;color:#7D6608}
+.cell-btn.pending{background:transparent;color:var(--color-text-tertiary)}
+
+.badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:var(--border-radius-md);font-weight:500;vertical-align:middle;margin-left:4px}
+.badge.tdah{background:var(--rojo-s);color:#7A1200;border:0.5px solid #f0b0a0}
+.badge.normal{background:var(--cian-s);color:#004E60;border:0.5px solid #a0d4e0}
+
+.insig{font-size:16px;letter-spacing:1px}
+.barra-wrap{height:8px;background:var(--bdr);border-radius:4px;overflow:hidden;margin-top:4px}
+.barra{height:100%;background:var(--azul2);border-radius:4px;transition:width 0.3s}
+.progreso-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:2px}
+
+.leyenda{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;padding:10px 0 0;color:var(--color-text-secondary)}
+.ley-item{display:flex;align-items:center;gap:5px}
+
+.modal-bg{position:absolute;inset:0;background:#00000040;display:flex;align-items:center;justify-content:center;z-index:10;min-height:300px}
+.modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--bdr);padding:20px 24px;width:320px;max-width:95%}
+.modal h3{font-size:15px;font-weight:500;margin-bottom:14px}
+.modal-row{margin-bottom:10px}
+.modal-row label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.modal-row input,select{width:100%;height:34px;padding:0 8px;border:0.5px solid var(--bdr);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px}
+.modal-row input:focus{outline:none;box-shadow:0 0 0 2px var(--azul2)40}
+.modal-btns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+
+.col-config{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+.col-item{display:flex;align-items:center;gap:6px;font-size:13px}
+.col-item input[type=text]{flex:1;height:30px;padding:0 6px;border:0.5px solid var(--bdr);border-radius:6px;background:var(--color-background-primary);color:var(--color-text-primary)}
+.col-item input[type=text]:focus{outline:none;box-shadow:0 0 0 2px var(--azul2)40}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--azul);color:#fff;padding:8px 16px;border-radius:var(--border-radius-md);font-size:13px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:99}
+.toast.show{opacity:1}
+
+.tab-bar{display:flex;gap:0;border-bottom:0.5px solid var(--bdr);margin-bottom:14px}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;color:var(--color-text-secondary);transition:all 0.15s}
+.tab.active{color:var(--azul2);border-bottom-color:var(--azul2);font-weight:500}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+</style>
+
+<div id="app">
+<h2 class="sr-only">Tablero de progreso – Misión Foco: seguimiento de actividades por estudiante</h2>
+
+<div class="toolbar">
+  <h1><i class="ti ti-layout-grid" aria-hidden="true" style="font-size:20px;vertical-align:-3px;margin-right:8px;color:var(--azul2)"></i>Tablero de progreso — Misión Foco</h1>
+  <button class="btn" onclick="abrirNivelModal()" title="Configurar niveles"><i class="ti ti-settings" aria-hidden="true"></i> Niveles</button>
+  <button class="btn" onclick="abrirEstModal()" title="Agregar estudiante"><i class="ti ti-user-plus" aria-hidden="true"></i> Alumno</button>
+  <button class="btn" onclick="resetarTodo()" title="Reiniciar todo"><i class="ti ti-refresh" aria-hidden="true"></i> Reiniciar</button>
+  <button class="btn primary" onclick="exportarCSV()"><i class="ti ti-download" aria-hidden="true"></i> Exportar</button>
+</div>
+
+<div class="stats-bar" id="stats-bar"></div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('tablero')">Tablero</div>
+  <div class="tab" onclick="switchTab('resumen')">Resumen visual</div>
+</div>
+
+<div id="tab-tablero" class="tab-panel active">
+  <div class="tabla-wrap">
+    <table id="tabla-main">
+      <thead id="thead-main"></thead>
+      <tbody id="tbody-main"></tbody>
+    </table>
+  </div>
+  <div class="leyenda">
+    <span class="ley-item"><span class="cell-btn done" style="pointer-events:none;width:24px;height:20px;font-size:13px">✓</span> Completado</span>
+    <span class="ley-item"><span class="cell-btn progress" style="pointer-events:none;width:24px;height:20px;font-size:13px">~</span> En progreso</span>
+    <span class="ley-item"><span class="cell-btn pending" style="pointer-events:none;width:24px;height:20px;font-size:13px">□</span> Pendiente</span>
+    <span class="ley-item"><span style="font-size:14px">★</span> Insignia obtenida</span>
+    <span class="ley-item"><span class="badge tdah">TDAH</span> Necesita apoyo</span>
+    <span class="ley-item"><span class="badge normal">Base</span> Sin dificultades</span>
+  </div>
+</div>
+
+<div id="tab-resumen" class="tab-panel">
+  <div id="resumen-content" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:4px"></div>
+</div>
+</div>
+
+<div id="modal-est" style="display:none;position:relative;min-height:300px">
+  <div class="modal-bg" onclick="cerrarModals()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3><i class="ti ti-user-plus" aria-hidden="true"></i> Agregar alumno</h3>
+    <div class="modal-row"><label>Nombre</label><input id="est-nombre" placeholder="Ej: Daniel M." /></div>
+    <div class="modal-row"><label>Perfil</label>
+      <select id="est-tipo">
+        <option value="tdah">Con TDAH / necesita apoyo</option>
+        <option value="normal">Sin dificultades</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn" onclick="cerrarModals()">Cancelar</button>
+      <button class="btn primary" onclick="agregarEstudiante()">Agregar</button>
+    </div>
+  </div></div>
+</div>
+
+<div id="modal-nivel" style="display:none;position:relative;min-height:300px">
+  <div class="modal-bg" onclick="cerrarModals()">
+  <div class="modal" style="width:360px" onclick="event.stopPropagation()">
+    <h3><i class="ti ti-settings" aria-hidden="true"></i> Configurar niveles / actividades</h3>
+    <div class="col-config" id="col-config-list"></div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <input id="nuevo-nivel" placeholder="Nombre del nuevo nivel..." style="flex:1;height:32px;padding:0 8px;border:0.5px solid var(--bdr);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px">
+      <button class="btn" onclick="agregarNivel()"><i class="ti ti-plus" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-btns">
+      <button class="btn primary" onclick="cerrarModals()">Listo</button>
+    </div>
+  </div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const ESTADOS = ['pending','progress','done'];
+const SIMBOLOS = {pending:'□', progress:'~', done:'✓'};
+
+let niveles = [
+  'Nv.1 Activación',
+  'Nv.2A Exploración',
+  'Nv.2B Sub-tarea',
+  'Nv.3 Aplicación',
+  'Cierre Kahoot!'
+];
+
+let estudiantes = [
+  {id:1, nombre:'Daniel M.', tipo:'tdah', estados:[], obs:''},
+  {id:2, nombre:'Lucía R.', tipo:'normal', estados:[], obs:''},
+  {id:3, nombre:'Alumno 3', tipo:'otro', estados:[], obs:''},
+  {id:4, nombre:'Alumno 4', tipo:'otro', estados:[], obs:''},
+  {id:5, nombre:'Alumno 5', tipo:'otro', estados:[], obs:''},
+  {id:6, nombre:'Alumno 6', tipo:'otro', estados:[], obs:''},
+];
+
+let nextId = 7;
+
+function normalizarEst(est) {
+  while(est.estados.length < niveles.length) est.estados.push('pending');
+  est.estados = est.estados.slice(0, niveles.length);
+  return est;
+}
+
+function insignias(est) {
+  return est.estados.filter(e => e === 'done').length;
+}
+
+function progreso(est) {
+  const d = est.estados.filter(e => e === 'done').length;
+  const p = est.estados.filter(e => e === 'progress').length;
+  return Math.round(((d + p * 0.5) / niveles.length) * 100);
+}
+
+function renderStats() {
+  const total = estudiantes.length;
+  const completaron = estudiantes.filter(e => e.estados.every(s => s === 'done')).length;
+  const enProg = estudiantes.filter(e => e.estados.some(s => s === 'progress') && !e.estados.every(s => s === 'done')).length;
+  const tdah = estudiantes.filter(e => e.tipo === 'tdah').length;
+  const prom = total ? Math.round(estudiantes.reduce((a,e) => a + progreso(e), 0) / total) : 0;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="label">Alumnos</div><div class="value">${total}</div></div>
+    <div class="stat-card"><div class="label">Misión completa</div><div class="value" style="color:var(--verde)">${completaron}</div></div>
+    <div class="stat-card"><div class="label">En progreso</div><div class="value" style="color:#7D6608">${enProg}</div></div>
+    <div class="stat-card"><div class="label">Con apoyo</div><div class="value" style="color:#9C2B0E">${tdah}</div></div>
+    <div class="stat-card"><div class="label">Progreso medio</div><div class="value">${prom}%</div></div>
+  `;
+}
+
+function renderTabla() {
+  const thead = document.getElementById('thead-main');
+  const tbody = document.getElementById('tbody-main');
+
+  thead.innerHTML = `<tr>
+    <th style="min-width:140px;text-align:left;padding-left:12px">Estudiante</th>
+    ${niveles.map((n,i) => `<th class="nv-col" onclick="cicleTodos(${i})" title="Clic: avanzar todos en este nivel">${n}</th>`).join('')}
+    <th style="min-width:60px">★</th>
+    <th style="min-width:100px">% logro</th>
+    <th style="min-width:150px;text-align:left;padding-left:8px">Observaciones</th>
+  </tr>`;
+
+  tbody.innerHTML = estudiantes.map(est => {
+    normalizarEst(est);
+    const ins = insignias(est);
+    const pct = progreso(est);
+    const tipoClass = est.tipo === 'tdah' ? 'tdah-row' : est.tipo === 'normal' ? 'normal-row' : '';
+    const badge = est.tipo === 'tdah' ? '<span class="badge tdah">TDAH</span>' : est.tipo === 'normal' ? '<span class="badge normal">Base</span>' : '';
+    const insStr = ins > 0 ? '<span class="insig">' + '★'.repeat(Math.min(ins,5)) + '</span>' : '—';
+
+    return `<tr class="${tipoClass}">
+      <td>${est.nombre}${badge}
+        <button class="btn danger" style="padding:2px 5px;font-size:11px;margin-left:6px;border-radius:4px" onclick="eliminarEst(${est.id})" title="Eliminar"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </td>
+      ${est.estados.map((s,i) => `<td>
+        <button class="cell-btn ${s}" onclick="cycleEstado(${est.id},${i})" title="${s === 'pending' ? 'Marcar en progreso' : s === 'progress' ? 'Marcar completado' : 'Volver a pendiente'}">
+          ${SIMBOLOS[s]}
+        </button>
+      </td>`).join('')}
+      <td>${insStr}</td>
+      <td>
+        <div class="progreso-label">${pct}%</div>
+        <div class="barra-wrap"><div class="barra" style="width:${pct}%"></div></div>
+      </td>
+      <td class="obs-cell"><input value="${est.obs||''}" placeholder="Notas..." oninput="updateObs(${est.id},this.value)"></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderResumen() {
+  const cont = document.getElementById('resumen-content');
+  cont.innerHTML = estudiantes.map(est => {
+    normalizarEst(est);
+    const pct = progreso(est);
+    const ins = insignias(est);
+    const color = est.tipo === 'tdah' ? '#9C2B0E' : est.tipo === 'normal' ? '#00708C' : 'var(--color-text-secondary)';
+    const bg = est.tipo === 'tdah' ? 'var(--rojo-s)' : est.tipo === 'normal' ? 'var(--cian-s)' : 'var(--color-background-secondary)';
+    return `<div style="background:var(--color-background-primary);border:0.5px solid var(--bdr);border-radius:var(--border-radius-lg);padding:12px 14px;border-top:3px solid ${color}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:500;font-size:13px">${est.nombre}</span>
+        <span style="font-size:12px;color:${color}">${pct}%</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(${Math.min(niveles.length,5)},1fr);gap:4px;margin-bottom:8px">
+        ${est.estados.map((s,i) => {
+          const bg2 = s==='done'?'#C6EFCE':s==='progress'?'#FFEB9C':'var(--color-background-secondary)';
+          const col = s==='done'?'#375623':s==='progress'?'#7D6608':'var(--color-text-tertiary)';
+          return `<div title="${niveles[i]}" style="height:24px;border-radius:4px;background:${bg2};display:flex;align-items:center;justify-content:center;font-size:11px;color:${col};font-weight:500">${SIMBOLOS[s]}</div>`;
+        }).join('')}
+      </div>
+      <div class="barra-wrap"><div class="barra" style="width:${pct}%;background:${color}"></div></div>
+      ${ins>0?`<div style="margin-top:6px;font-size:13px;color:#CC7A00">${'★'.repeat(Math.min(ins,5))}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function render() {
+  renderStats();
+  renderTabla();
+  renderResumen();
+}
+
+function cycleEstado(id, idx) {
+  const est = estudiantes.find(e => e.id === id);
+  if(!est) return;
+  const cur = ESTADOS.indexOf(est.estados[idx]);
+  est.estados[idx] = ESTADOS[(cur+1) % ESTADOS.length];
+  render();
+  if(est.estados[idx] === 'done') toast(`✓ ${est.nombre} completó ${niveles[idx]}`);
+}
+
+function cicleTodos(idx) {
+  const all_done = estudiantes.every(e => e.estados[idx] === 'done');
+  estudiantes.forEach(e => { normalizarEst(e); e.estados[idx] = all_done ? 'pending' : 'done'; });
+  render();
+  toast(all_done ? `Nivel ${idx+1} reiniciado` : `Todos avanzaron en ${niveles[idx]}`);
+}
+
+function updateObs(id, val) {
+  const est = estudiantes.find(e => e.id === id);
+  if(est) est.obs = val;
+}
+
+function eliminarEst(id) {
+  estudiantes = estudiantes.filter(e => e.id !== id);
+  render();
+}
+
+function abrirEstModal() {
+  document.getElementById('modal-est').style.display = 'block';
+  document.getElementById('est-nombre').value = '';
+  setTimeout(() => document.getElementById('est-nombre').focus(), 50);
+}
+
+function agregarEstudiante() {
+  const nombre = document.getElementById('est-nombre').value.trim();
+  if(!nombre) return;
+  const tipo = document.getElementById('est-tipo').value;
+  estudiantes.push({id: nextId++, nombre, tipo, estados: niveles.map(() => 'pending'), obs: ''});
+  cerrarModals();
+  render();
+  toast(`Alumno ${nombre} agregado`);
+}
+
+function abrirNivelModal() {
+  document.getElementById('modal-nivel').style.display = 'block';
+  renderColConfig();
+}
+
+function renderColConfig() {
+  document.getElementById('col-config-list').innerHTML = niveles.map((n,i) =>
+    `<div class="col-item">
+      <i class="ti ti-grip-vertical" aria-hidden="true" style="color:var(--color-text-tertiary)"></i>
+      <input type="text" value="${n}" onchange="renombrarNivel(${i},this.value)" />
+      <button class="btn danger" style="padding:2px 6px;font-size:12px" onclick="eliminarNivel(${i})" ${niveles.length<=1?'disabled':''}><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`
+  ).join('');
+}
+
+function renombrarNivel(i, val) {
+  niveles[i] = val;
+}
+
+function agregarNivel() {
+  const val = document.getElementById('nuevo-nivel').value.trim();
+  if(!val) return;
+  niveles.push(val);
+  document.getElementById('nuevo-nivel').value = '';
+  estudiantes.forEach(e => { normalizarEst(e); });
+  renderColConfig();
+  render();
+}
+
+function eliminarNivel(i) {
+  if(niveles.length <= 1) return;
+  niveles.splice(i,1);
+  estudiantes.forEach(e => { e.estados.splice(i,1); normalizarEst(e); });
+  renderColConfig();
+  render();
+}
+
+function cerrarModals() {
+  document.getElementById('modal-est').style.display = 'none';
+  document.getElementById('modal-nivel').style.display = 'none';
+}
+
+function resetarTodo() {
+  if(!confirm('¿Reiniciar todos los estados a pendiente?')) return;
+  estudiantes.forEach(e => e.estados = niveles.map(() => 'pending'));
+  render();
+  toast('Tablero reiniciado');
+}
+
+function exportarCSV() {
+  const header = ['Nombre','Tipo',...niveles,'Insignias','% Logro','Observaciones'];
+  const rows = estudiantes.map(e => {
+    normalizarEst(e);
+    return [e.nombre, e.tipo, ...e.estados.map(s => ({pending:'Pendiente',progress:'En progreso',done:'Completado'}[s])), insignias(e), progreso(e)+'%', e.obs||''];
+  });
+  const csv = [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'tablero_mision_foco.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exportado');
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['tablero','resumen'][i]===id));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='resumen') renderResumen();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModals(); });
+
+render();
+</script>
